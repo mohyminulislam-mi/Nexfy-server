@@ -31,15 +31,47 @@ async function run() {
     const productsCollection = database.collection("products");
 
     app.get("/products", async (req, res) => {
-      const query = {};
-      const result = await productsCollection.find(query).toArray();
-      res.send(result);
+      try {
+        const query = {};
+        const result = await productsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Server error" });
+      }
     });
+    // Featured products
+    app.get("/featured", async (req, res) => {
+      try {
+        const query = {};
+        const result = await productsCollection.find(query).limit(8).toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Server error" });
+      }
+    });
+    // discounted apis
+    app.get("/discounted", async (req, res) => {
+      try {
+        const query = {
+          $expr: { $gt: ["$originalPrice", "$price"] },
+        };
+
+        const result = await productsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Server error" });
+      }
+    });
+    // products details with id
     app.get("/products/:id", async (req, res) => {
-      const { id } = req.params;
-      const query = { _id: new ObjectId(id) };
-      const result = await productsCollection.findOne(query);
-      res.send(result);
+      try {
+        const { id } = req.params;
+        const query = { _id: new ObjectId(id) };
+        const result = await productsCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Server error" });
+      }
     });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
